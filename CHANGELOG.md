@@ -2,6 +2,25 @@
 
 All notable changes to RosterFocus are documented here.
 
+## [0.3.0] — 2026-06-30
+
+### Added
+- **Native macOS menu-bar app** under `app/` (SwiftUI, Xcode 26 / macOS 14+). A
+  click-through setup wizard (calendar access → create Focus → import Shortcuts →
+  rules editor with dropdowns → enable + launch at login) and a background scheduler
+  that runs the exact same decision logic as the CLI. Shares the CLI's config file.
+  - `RosterFocusCore` framework holds the pure logic + services; unit-tested
+    (Decider priority/keyword/lead-trail, config round-trip, shortcut-list parsing).
+  - XcodeGen `project.yml` + committed `.xcodeproj`; `scripts/build-local.sh`
+    (ad-hoc, hardened runtime) and `scripts/package-notarize.sh` (Developer ID →
+    notarytool → staple) for distribution.
+  - Not sandboxed (must exec `/usr/bin/shortcuts` and read `~/.config`), hardened
+    runtime on for notarization.
+
+### Notes
+- The CLI is unchanged and remains the recommended path for **headless** Macs. Don't
+  run the app and the launchd CLI agent simultaneously — disable the agent first.
+
 ## [0.2.1] — 2026-06-30
 
 ### Added

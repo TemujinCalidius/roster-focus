@@ -16,6 +16,20 @@ Mac (always on) ──reads your shift calendar(s) via EventKit──▶ which F
         Focus syncs to your iPhone via "Share Across Devices"
 ```
 
+## Two ways to run it
+
+| | Best for | |
+|---|---|---|
+| 🖥️ **Menu-bar app** ([`app/`](app/)) | Most people — click-through setup wizard, no Terminal | **Recommended** |
+| ⌨️ **Python CLI** (this folder) | Headless Macs (e.g. a Mac mini you never log into graphically) and power users | |
+
+Both make the *same* decisions and share the same config file
+(`~/.config/roster-focus/config.json`), so you can use either. **Don't run both at once** —
+the launchd CLI agent and the app would fight over the state. If you adopt the app, disable the
+CLI agent first: `launchctl unload ~/Library/LaunchAgents/com.rosterfocus.agent.plist`.
+
+See [`app/README.md`](app/README.md) for the app; the rest of this page covers the CLI.
+
 ## Why it works this way
 
 iOS exposes **no public API** to set a Focus directly — Apple's only sanctioned
