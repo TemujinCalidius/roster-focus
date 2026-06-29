@@ -54,6 +54,7 @@ pure iPhone/Shortcuts automation unreliable, and keying off calendar *events*
 |------|---------|
 | `rosterfocus.py` | Core poller: reads calendars, decides the Focus, runs the Shortcut |
 | `config.example.json` | Annotated config template (calendars → Focus mappings) |
+| `install.sh` | One-shot installer: venv + bindings, config scaffold, launchd agent |
 | `com.rosterfocus.agent.plist` | `launchd` template (runs the poller every 60s) |
 | `SETUP.md` | Full setup: Shortcuts, install, permissions, troubleshooting |
 
@@ -62,11 +63,24 @@ pure iPhone/Shortcuts automation unreliable, and keying off calendar *events*
 1. On your iPhone: **Settings → Focus → Share Across Devices = ON**.
 2. On the Mac, build a pair of **Shortcuts** per Focus (e.g. *Work Focus On* /
    *Work Focus Off*) — these are the only thing that can actually flip a Focus.
-3. `pip3 install pyobjc-framework-EventKit`
-4. Copy `config.example.json` → `~/.config/roster-focus/config.json` and edit it.
-5. `python3 rosterfocus.py --list-calendars` to grant access and confirm names.
-6. `python3 rosterfocus.py --dry-run -v` to see what it *would* do (no toggling).
-7. `python3 rosterfocus.py` for the real run, then schedule it with `launchd`.
+3. Run `./install.sh` (creates the venv + bindings, scaffolds config and the
+   launchd agent with real paths). Then edit `~/.config/roster-focus/config.json`.
+4. `python3 rosterfocus.py --list-calendars` — grants Calendar access, confirms names.
+5. `python3 rosterfocus.py --doctor` — checks access, calendars, and Shortcuts.
+6. `python3 rosterfocus.py --dry-run -v` — shows what it *would* do (no toggling).
+7. `python3 rosterfocus.py`, then `launchctl load` the agent to run it every 60s.
+
+> On a **headless Mac mini**, Screen Share in for the one-time Calendar grant and
+> Shortcut building — macOS won't show those prompts over plain SSH. See SETUP.md.
+
+### Diagnostics
+
+| Command | What it does |
+|---|---|
+| `--doctor` | One-shot health check: permission, calendars, Shortcut names |
+| `--validate` | Check the config only (no Calendar/Shortcuts needed) |
+| `--list-calendars` | Print every calendar it can see (and trigger the access prompt) |
+| `--dry-run [-v]` | Decide against the real calendar without toggling anything |
 
 Full step-by-step instructions, including the exact Shortcut actions and
 troubleshooting, are in **[SETUP.md](SETUP.md)**.

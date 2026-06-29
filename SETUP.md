@@ -6,7 +6,33 @@ as the orchestrator. The Mac sets the Focus; your iPhone inherits it.
 This guide walks through it end-to-end. It looks long because it's thorough —
 the actual work is about ten minutes.
 
+> **Headless Mac mini? Read this first.** Granting Calendar access and building
+> Shortcuts both require a **logged-in graphical session** — macOS will not show
+> the permission prompt to a plain SSH/headless process, and there's no
+> command-line way to author the Shortcuts. On a headless mini, **Screen Share
+> in once** to do the one-time setup (steps 2 and 5). After that the launchd
+> agent runs fine unattended. Run `rosterfocus.py --doctor` any time to see what
+> still needs doing.
+
 ---
+
+## 0. Easiest path: the installer
+
+From the cloned repo:
+
+```bash
+./install.sh
+```
+
+It creates a Python venv with the EventKit bindings, copies the example config
+to `~/.config/roster-focus/config.json`, and writes a launchd agent
+(`~/Library/LaunchAgents/com.rosterfocus.agent.plist`) **with the real
+interpreter and script paths already filled in**. It does *not* load the agent or
+grant any permissions — it prints the exact next steps. Then edit your config,
+build your Shortcuts (step 2), and run `--doctor`.
+
+The manual steps below explain what the installer does, and are the path if you'd
+rather not use it.
 
 ## 1. Prerequisites (one-time, on iPhone)
 
@@ -40,17 +66,21 @@ in your config.
 Test each by running it manually — confirm your iPhone's Focus follows within a
 few seconds.
 
-## 3. Install the script
+## 3. Install the script (skip if you ran install.sh)
+
+The EventKit bindings won't install into the system `python3` on modern macOS, so
+use a venv and point everything at that interpreter:
 
 ```bash
-mkdir -p ~/Scripts
-cp rosterfocus.py ~/Scripts/
-
-# Use a Python that has the pyobjc EventKit bindings:
-pip3 install pyobjc-framework-EventKit
-#   On newer macOS you may need:  pip3 install --break-system-packages pyobjc-framework-EventKit
-#   (or install into a venv and point launchd at that interpreter)
+cd /path/to/roster-focus
+python3 -m venv .venv
+.venv/bin/pip install pyobjc-framework-EventKit
 ```
+
+From here on, `python3` below means **`.venv/bin/python`** — that's the
+interpreter that has the bindings, and the one launchd must run. (You can also
+`pip3 install --break-system-packages pyobjc-framework-EventKit` against the
+system Python, but the venv is cleaner.)
 
 ## 4. Create your config
 
@@ -97,25 +127,40 @@ python3 ~/Scripts/rosterfocus.py --dry-run -v
 ```
 
 If a shift is on your calendar right now you'll see `desired='Work'` (or whichever
-Focus); otherwise `desired='none'`. Once that looks right, a normal run does the
-real toggle:
+Focus); otherwise `desired='none'`.
+
+Once you've also built your Shortcuts (step 2), `--doctor` checks the whole setup
+in one shot — calendar permission, that each configured calendar exists, and that
+each Shortcut name resolves:
 
 ```bash
-python3 ~/Scripts/rosterfocus.py
+python3 rosterfocus.py --doctor
+```
+
+When that's all `[OK ]`, a normal run does the real toggle:
+
+```bash
+python3 rosterfocus.py
 ```
 
 It prints `focus -> Work` (or `none`). Run it again and it prints nothing — that's
 correct, it only acts on a *change*.
 
+> `--validate` checks just your config (no Calendar/Shortcuts needed), so you can
+> debug rules on any machine.
+
 ## 6. Schedule it with launchd (every 60s)
 
-Copy the template, then edit `USERNAME` and the python path to match yours:
+If you ran `install.sh`, the agent is already written with the right paths —
+just `launchctl load` it (below). Otherwise copy the template and edit the two
+`<string>` paths:
 
 ```bash
 cp com.rosterfocus.agent.plist ~/Library/LaunchAgents/
-# edit ~/Library/LaunchAgents/com.rosterfocus.agent.plist:
-#   - the python3 path (run `which python3`, or your venv's bin/python3)
-#   - /Users/USERNAME/Scripts/rosterfocus.py
+# edit ~/Library/LaunchAgents/com.rosterfocus.agent.plist, both <string> entries:
+#   - the interpreter: your VENV python  (e.g. /path/to/roster-focus/.venv/bin/python)
+#     — NOT `/usr/bin/python3`; the system Python lacks the EventKit bindings.
+#   - the script:      /path/to/roster-focus/rosterfocus.py
 ```
 
 Load it:
@@ -135,10 +180,20 @@ launchctl unload ~/Library/LaunchAgents/com.rosterfocus.agent.plist
 
 ## Caveats / troubleshooting
 
-- **Calendar permission under launchd.** The interpreter launchd runs may need
-  Calendar access granted explicitly in **System Settings → Privacy & Security →
-  Calendars**. Running it once manually first (step 5) usually seeds this. If the
-  log shows `calendar access denied`, add your `python3` there manually.
+- **Calendar permission (the #1 first-run gotcha).** macOS only shows the Calendar
+  prompt to a process attached to a **logged-in graphical session** — so you must
+  run `--list-calendars` once from **Terminal.app in a real login session** (or
+  over Screen Sharing on a headless mini) and click **Allow Full Access**. A plain
+  SSH/headless run, or a launchd job, can't raise the prompt and will report
+  `calendar access denied` instantly. Note the **Privacy & Security → Calendars**
+  pane has no "add" button — it only lists apps that have already prompted, so you
+  can't pre-authorize an interpreter there; you must let it prompt once.
+  Run `--doctor` to see the exact authorization state (`NotDetermined`, `Denied`,
+  `Authorized`, …) and what to do about it.
+- **launchd still says `calendar access denied` after granting?** The grant is
+  tied to the interpreter binary; if the agent runs a *different* python than the
+  one you granted, it won't inherit access. Make the plist point at the exact same
+  venv python you ran `--list-calendars` with, then reload the agent.
 - **"none of the configured calendars were found".** The `calendar` name in your
   config must match the calendar title exactly (case-sensitive). RosterFocus
   fails safe here — if it can't read any configured calendar it does nothing

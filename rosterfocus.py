@@ -27,6 +27,8 @@ import threading
 import subprocess
 from datetime import datetime
 
+__version__ = "0.2.0"
+
 # EventKit is imported lazily (see ensure_eventkit) so that --help and other
 # argument parsing work even on a machine without the pyobjc bindings installed.
 EKEventStore = EKEntityTypeEvent = NSDate = None
@@ -69,13 +71,21 @@ STATE_FILE = os.path.expanduser(
 )
 
 
-def load_config():
-    """Load the first config file that exists; exit with guidance if none."""
+def load_config_quiet():
+    """Load the first config file that exists; raise FileNotFoundError if none."""
     for path in DEFAULT_CONFIG_PATHS:
         if path and os.path.isfile(path):
             with open(path) as f:
-                cfg = json.load(f)
-            return cfg, path
+                return json.load(f), path
+    raise FileNotFoundError("no rosterfocus config found")
+
+
+def load_config():
+    """Load the first config file that exists; exit with guidance if none."""
+    try:
+        return load_config_quiet()
+    except FileNotFoundError:
+        pass
     sys.stderr.write(
         "[rosterfocus] No config found. Looked in:\n"
         + "".join(f"    {p}\n" for p in DEFAULT_CONFIG_PATHS if p)
@@ -212,8 +222,46 @@ def write_state(focus):
         json.dump({"focus": focus}, f)
 
 
+def list_shortcuts():
+    """Return the set of Shortcut names known to the Shortcuts app ('' if the
+    CLI is unavailable)."""
+    try:
+        proc = subprocess.run(
+            ["shortcuts", "list"], capture_output=True, text=True, timeout=15
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0:
+        return None
+    return {line.strip() for line in proc.stdout.splitlines() if line.strip()}
+
+
 def run_shortcut(name):
-    subprocess.run(["shortcuts", "run", name], check=False)
+    """Run a Shortcut by name. Returns True on success, False on failure.
+
+    The `shortcuts` CLI exits 0 even when the named shortcut doesn't exist (it
+    just prints an error), so we verify the name exists first and also treat any
+    error output as failure. This stops a typo'd shortcut name from silently
+    recording state as if the Focus had been toggled.
+    """
+    known = list_shortcuts()
+    if known is not None and name not in known:
+        sys.stderr.write(
+            f"[rosterfocus] shortcut '{name}' not found in Shortcuts.app — "
+            "check the name in your config matches exactly.\n"
+        )
+        return False
+    proc = subprocess.run(
+        ["shortcuts", "run", name], capture_output=True, text=True
+    )
+    err = (proc.stderr or "").strip()
+    if proc.returncode != 0 or "Error" in err or "Couldn't find" in err:
+        sys.stderr.write(
+            f"[rosterfocus] shortcut '{name}' failed: "
+            f"{err or ('exit ' + str(proc.returncode))}\n"
+        )
+        return False
+    return True
 
 
 # --------------------------------------------------------------------------
@@ -223,6 +271,19 @@ def parse_args(argv=None):
     p = argparse.ArgumentParser(
         prog="rosterfocus",
         description="Drive iOS/macOS Focus modes from your shift calendar(s).",
+    )
+    p.add_argument("--version", action="version", version=f"rosterfocus {__version__}")
+    p.add_argument(
+        "--doctor",
+        action="store_true",
+        help="Diagnose the setup: calendar permission, that each configured calendar "
+        "exists, and that each Shortcut exists. Fixes nothing; just reports.",
+    )
+    p.add_argument(
+        "--validate",
+        action="store_true",
+        help="Check that the config file parses and every rule is well-formed, "
+        "without touching Calendar or Shortcuts. Works on any machine.",
     )
     p.add_argument(
         "--list-calendars",
@@ -274,8 +335,101 @@ def decide(rules, events_by_cal, now_ts, verbose=False):
     return "", None
 
 
+AUTH_STATUS = {
+    0: "NotDetermined (never prompted — run --list-calendars once from a GUI session)",
+    1: "Restricted (blocked by a profile/parental controls)",
+    2: "Denied (enable it in System Settings > Privacy & Security > Calendars)",
+    3: "Authorized (full access)",
+    4: "WriteOnly (insufficient — RosterFocus needs read access)",
+}
+
+
+def cmd_validate():
+    """Config-only check: parse + normalize the rules. No Calendar/Shortcuts."""
+    cfg, cfg_path = load_config()
+    rules = normalize_rules(cfg)  # exits with a message if malformed
+    print(f"[rosterfocus] config OK: {cfg_path}")
+    print(f"  {len(rules)} rule(s), evaluated in this priority order:")
+    for i, r in enumerate(rules, 1):
+        kw = f" keyword='{r['keyword']}'" if r["keyword"] else ""
+        pad = []
+        if r["lead_minutes"]:
+            pad.append(f"lead {r['lead_minutes']}m")
+        if r["trail_minutes"]:
+            pad.append(f"trail {r['trail_minutes']}m")
+        padtxt = f"  [{', '.join(pad)}]" if pad else ""
+        print(
+            f"   {i}. calendar='{r['calendar']}'{kw} -> focus '{r['focus']}' "
+            f"(on='{r['on_shortcut']}', off='{r['off_shortcut']}'){padtxt}"
+        )
+
+
+def cmd_doctor():
+    """Report on everything first-run setup depends on, fixing nothing."""
+    ok = True
+    print(f"RosterFocus {__version__} — doctor\n")
+
+    # 1. Calendar permission (class method; does NOT trigger a prompt).
+    ensure_eventkit()
+    status = EKEventStore.authorizationStatusForEntityType_(EKEntityTypeEvent)
+    authorized = status == 3
+    mark = "OK " if authorized else "!! "
+    print(f"[{mark}] Calendar access: {AUTH_STATUS.get(status, f'unknown ({status})')}")
+    if not authorized:
+        ok = False
+
+    # 2. Config.
+    try:
+        cfg, cfg_path = load_config_quiet()
+    except FileNotFoundError:
+        print("[!! ] Config: not found (copy config.example.json to "
+              "~/.config/roster-focus/config.json)")
+        print("\nFix the items marked !! above, then re-run --doctor.")
+        sys.exit(1)
+    print(f"[OK ] Config: {cfg_path}")
+    rules = normalize_rules(cfg)
+
+    # 3. Calendars exist (only checkable if authorized).
+    visible = set(all_calendar_titles(EKEventStore.alloc().init())) if authorized else None
+    # 4. Shortcuts exist.
+    shortcuts = list_shortcuts()
+    if shortcuts is None:
+        print("[!! ] Shortcuts: could not run the `shortcuts` CLI")
+        ok = False
+
+    print("\nPer-rule checks:")
+    for i, r in enumerate(rules, 1):
+        print(f"  rule {i}: calendar '{r['calendar']}' -> focus '{r['focus']}'")
+        if visible is not None:
+            cal_ok = r["calendar"] in visible
+            print(f"    [{'OK ' if cal_ok else '!! '}] calendar '{r['calendar']}'"
+                  + ("" if cal_ok else " not found"))
+            ok = ok and cal_ok
+        else:
+            print(f"    [?? ] calendar '{r['calendar']}' (can't check — no access)")
+        if shortcuts is not None:
+            for kind in ("on_shortcut", "off_shortcut"):
+                s = r[kind]
+                s_ok = s in shortcuts
+                print(f"    [{'OK ' if s_ok else '!! '}] shortcut '{s}'"
+                      + ("" if s_ok else " not found in Shortcuts.app"))
+                ok = ok and s_ok
+
+    print("\nNote: 'Share Across Devices' (what propagates Focus to your iPhone) can't "
+          "be read here — confirm it's ON manually in Settings > Focus on both devices.")
+    print("\n" + ("All checks passed." if ok else "Some checks failed (see !! above)."))
+    sys.exit(0 if ok else 1)
+
+
 def main(argv=None):
     args = parse_args(argv)
+
+    if args.validate:
+        cmd_validate()
+        return
+    if args.doctor:
+        cmd_doctor()
+        return
 
     # --list-calendars works without a config so it can be the very first check.
     if args.list_calendars:
@@ -326,16 +480,25 @@ def main(argv=None):
     if current == desired:
         return
 
-    # Turn off the previously-active Focus (if any) so we don't leave a stale
-    # one on when switching directly between two Focuses.
-    if current:
-        prev_rule = next((r for r in rules if r["focus"] == current), None)
+    prev_rule = next((r for r in rules if r["focus"] == current), None) if current else None
+
+    if desired_rule:
+        # Switching to a Focus. Turning a Focus on replaces any active one, so
+        # turning off the previous one is best-effort; the ON is what must work.
         if prev_rule:
             run_shortcut(prev_rule["off_shortcut"])
+        ok = run_shortcut(desired_rule["on_shortcut"])
+    else:
+        # Switching to no Focus: the OFF of the current Focus is what must work.
+        ok = run_shortcut(prev_rule["off_shortcut"]) if prev_rule else True
 
-    # Turn on the new Focus (enabling a Focus replaces any other active one).
-    if desired_rule:
-        run_shortcut(desired_rule["on_shortcut"])
+    if not ok:
+        # Don't record the change, so the next poll retries instead of silently
+        # believing the Focus was set.
+        sys.stderr.write(
+            "[rosterfocus] focus change failed; not recording state (will retry).\n"
+        )
+        sys.exit(1)
 
     write_state(desired)
     label = desired or "none"

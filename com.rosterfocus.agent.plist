@@ -7,10 +7,12 @@
     <string>com.rosterfocus.agent</string>
     <key>ProgramArguments</key>
     <array>
-        <!-- Point this at a python3 that has pyobjc-framework-EventKit installed.
-             Find it with: which python3   (or your venv's bin/python3) -->
-        <string>/usr/bin/python3</string>
-        <string>/Users/USERNAME/Scripts/rosterfocus.py</string>
+        <!-- Point this at the VENV python that has pyobjc-framework-EventKit
+             installed (e.g. /path/to/roster-focus/.venv/bin/python). Do NOT use
+             /usr/bin/python3 — the system Python lacks the bindings. The
+             install.sh script fills these two paths in for you automatically. -->
+        <string>/path/to/roster-focus/.venv/bin/python</string>
+        <string>/path/to/roster-focus/rosterfocus.py</string>
     </array>
     <key>StartInterval</key>
     <integer>60</integer>
