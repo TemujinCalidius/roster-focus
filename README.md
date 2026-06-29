@@ -59,20 +59,42 @@ pure iPhone/Shortcuts automation unreliable, and keying off calendar *events*
 | `shortcuts/` | Prebuilt, signed **Work Focus On/Off** shortcuts (import instead of hand-building) |
 | `SETUP.md` | Full setup: Shortcuts, install, permissions, troubleshooting |
 
+## What you need first
+
+A few things only **you** can do — macOS provides no API to script them, so the
+installer guides you through them rather than doing them silently:
+
+- **A Mac that's always on**, signed into your iCloud/Apple Account (macOS 12+).
+- **An iPhone** on the same Apple Account.
+- **A Focus named `Work`** on the Mac. ⚠️ **Software cannot create a Focus** —
+  there's no API, Shortcut, or AppleScript for it. You create it once in
+  **System Settings → Focus → `+` → Work** (Apple's built-in "Work" suggestion is
+  ideal — the prebuilt Shortcuts target it). The Focus *name* must match your config.
+- **A pair of Shortcuts per Focus** (e.g. *Work Focus On* / *Work Focus Off*) —
+  the only sanctioned way to flip a Focus. For the built-in Work Focus you can
+  **import the prebuilt ones** in [`shortcuts/`](shortcuts/) instead of building them.
+- **Settings → Focus → Share Across Devices = ON** on *both* devices — this is
+  what carries the Focus from the Mac to your iPhone.
+
 ## Quick start
 
-1. On your iPhone: **Settings → Focus → Share Across Devices = ON**.
-2. On the Mac, build a pair of **Shortcuts** per Focus (e.g. *Work Focus On* /
-   *Work Focus Off*) — these are the only thing that can actually flip a Focus.
-3. Run `./install.sh` (creates the venv + bindings, scaffolds config and the
-   launchd agent with real paths). Then edit `~/.config/roster-focus/config.json`.
-4. `python3 rosterfocus.py --list-calendars` — grants Calendar access, confirms names.
-5. `python3 rosterfocus.py --doctor` — checks access, calendars, and Shortcuts.
-6. `python3 rosterfocus.py --dry-run -v` — shows what it *would* do (no toggling).
-7. `python3 rosterfocus.py`, then `launchctl load` the agent to run it every 60s.
+```bash
+git clone https://github.com/TemujinCalidius/roster-focus.git
+cd roster-focus
+./install.sh        # sets up the venv/config/agent, then guides you through the rest
+```
 
-> On a **headless Mac mini**, Screen Share in for the one-time Calendar grant and
-> Shortcut building — macOS won't show those prompts over plain SSH. See SETUP.md.
+`./install.sh` creates the Python venv + EventKit bindings, scaffolds your config,
+writes the launchd agent **with the right paths filled in**, and then — when run
+in a terminal — **walks you through the manual macOS steps above**, opening the
+Focus settings and Shortcuts for you and verifying each step with `--doctor`.
+Use `./install.sh --no-guide` to just set up files and get a printed checklist.
+
+> On a **headless Mac mini**, run the installer over **Screen Sharing**, not plain
+> SSH — macOS only shows the Calendar prompt and lets you build Shortcuts in a
+> graphical login session. After that one-time setup, the launchd agent runs
+> unattended (it inherits the Calendar grant). See [SETUP.md](SETUP.md) for the
+> fully manual path and troubleshooting.
 
 ### Diagnostics
 
@@ -88,9 +110,24 @@ troubleshooting, are in **[SETUP.md](SETUP.md)**.
 
 ## Requirements
 
-- An always-on Mac (macOS 12+; macOS 14+ uses the newer Calendar permission API).
-- Python 3 with `pyobjc-framework-EventKit`.
-- An iPhone signed into the same Apple Account with *Share Across Devices* on.
+- An always-on Mac (macOS 12+; macOS 14+ uses the newer Calendar permission API),
+  signed into your Apple Account with the Calendar app set up.
+- Python 3 (the installer builds a venv with `pyobjc-framework-EventKit`).
+- An iPhone on the same Apple Account with *Share Across Devices* on.
+- A Focus mode and a matching Shortcut pair per Focus (see *What you need first*).
+
+### Why can't it just create the Focus / set it directly?
+
+Two deliberate Apple restrictions, and RosterFocus works within both:
+
+1. **No app can create a Focus mode.** There's no public API, Shortcut action, or
+   AppleScript to define one. The definitions live in an undocumented, sandbox-
+   protected database. So you create the Focus yourself, once, in System Settings.
+2. **No app can turn a Focus on/off directly** — only the **Shortcuts** app can.
+   RosterFocus therefore runs a Shortcut to do the toggle, rather than setting the
+   Focus itself.
+
+Everything else (deciding *when* to toggle, from your calendar) is automated.
 
 ## How it differs from similar tools
 

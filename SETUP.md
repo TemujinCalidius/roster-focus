@@ -24,20 +24,44 @@ From the cloned repo:
 ./install.sh
 ```
 
-It creates a Python venv with the EventKit bindings, copies the example config
-to `~/.config/roster-focus/config.json`, and writes a launchd agent
-(`~/Library/LaunchAgents/com.rosterfocus.agent.plist`) **with the real
-interpreter and script paths already filled in**. It does *not* load the agent or
-grant any permissions — it prints the exact next steps. Then edit your config,
-build your Shortcuts (step 2), and run `--doctor`.
+It does two things:
 
-The manual steps below explain what the installer does, and are the path if you'd
-rather not use it.
+1. **File setup** — creates a Python venv with the EventKit bindings, copies the
+   example config to `~/.config/roster-focus/config.json`, and writes a launchd
+   agent (`~/Library/LaunchAgents/com.rosterfocus.agent.plist`) **with the real
+   interpreter and script paths already filled in**.
+2. **Guided setup** (when run in a terminal) — then walks you through the manual
+   macOS steps no script can do: creating the **Work** Focus, adding the
+   Shortcuts, and granting Calendar access, opening the right places for you and
+   verifying each with `--doctor`. It asks before loading the launchd agent.
 
-## 1. Prerequisites (one-time, on iPhone)
+Run `./install.sh --no-guide` to do only the file setup and get a printed
+checklist instead. The numbered sections below are the fully manual path and
+explain exactly what the guided installer is doing.
 
-- **Settings → Focus → Share Across Devices = ON.** This is what lets a Focus set
-  on the Mac propagate to the phone. Without it, nothing reaches your iPhone.
+> **Do this on the Mac itself or over Screen Sharing — not plain SSH.** macOS only
+> shows the Calendar permission prompt, and only lets you create a Focus / build
+> Shortcuts, in a graphical login session.
+
+## 1. Prerequisites
+
+**On the iPhone (and the Mac):**
+
+- **Settings → Focus → Share Across Devices = ON** on *both* devices. This is what
+  lets a Focus set on the Mac propagate to the phone. Without it, nothing reaches
+  your iPhone.
+
+**Create the Focus you want to drive (on the Mac):**
+
+- RosterFocus toggles a Focus *mode* — **it cannot create one** (Apple exposes no
+  API, Shortcut, or AppleScript to define a Focus). Create it yourself, once:
+  **System Settings → Focus → `+` → Work**. Apple's built-in **Work** suggestion is
+  ideal — it gets the `com.apple.focus.work` identifier the prebuilt Shortcuts
+  target. The Focus *name* must match the `focus` you reference in your config.
+- Repeat for any other Focus you plan to use (Do Not Disturb already exists).
+
+**Have a shift calendar:**
+
 - One or more calendars containing your shift events. The calendar *names* must
   match what you put in `config.json` (e.g. `Work`, `On-Call`). Any calendar that
   syncs to your Mac works — iCloud, Google, Exchange, etc.
