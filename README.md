@@ -39,7 +39,8 @@ pure iPhone/Shortcuts automation unreliable, and keying off calendar *events*
   hours, and overnight/multi-day shifts — not fixed times.
 - **Multiple Focus modes.** Map several calendars (and optional title keywords)
   to different Focus modes — e.g. `On-Call → Do Not Disturb`, `Work → Work`,
-  `Gym → Fitness`.
+  `Gym → Fitness`. (Adding one is three steps — see
+  [Adding more Focus modes](SETUP.md#adding-more-focus-modes).)
 - **Priority ordering.** iOS allows one Focus at a time; rules are evaluated
   top-to-bottom and the first active one wins.
 - **Lead / trail padding.** Start a Focus a few minutes before a shift, or hold

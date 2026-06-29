@@ -137,6 +137,51 @@ If no rule is active, all Focuses are turned off.
 > The example config uses `_comment` keys for inline notes — they're ignored by
 > the script, so you can leave them in or delete them.
 
+### Adding more Focus modes
+
+The multi-Focus support is just more rules — no code changes. For **each** extra
+Focus you want to drive from your calendar:
+
+1. **Create the Focus** (once): System Settings → Focus → `+`. (Do Not Disturb
+   already exists.) Remember its exact name. *Software can't create a Focus — this
+   step is always manual.*
+2. **Make its Shortcut pair** (once): build them by hand in Shortcuts.app
+   (`<Focus> On` / `<Focus> Off`), **or** copy `shortcuts/src/WorkFocusOn.unsigned.shortcut`
+   / `...Off...`, change the `Identifier` + `DisplayString` under `FocusModes` to
+   your Focus, and run `shortcuts/build.sh` to sign them. (Built-in identifiers are
+   listed in [shortcuts/README.md](shortcuts/README.md); a *custom* Focus uses a
+   per-user UUID, so it's easiest to build that pair by hand and pick the Focus in
+   the editor.)
+3. **Add a rule** mapping a calendar (and optional keyword) to that Focus.
+
+A calendar entry chooses a Focus in one of two ways — by which **calendar** it's
+on, or by a **keyword** in its title. Here's both at once:
+
+```json
+{
+  "rules": [
+    { "calendar": "On-Call", "focus": "Do Not Disturb",
+      "on_shortcut": "DND On", "off_shortcut": "DND Off" },
+
+    { "calendar": "Work", "keyword": "night", "focus": "Sleep",
+      "on_shortcut": "Sleep Focus On", "off_shortcut": "Sleep Focus Off" },
+
+    { "calendar": "Work", "focus": "Work",
+      "on_shortcut": "Work Focus On", "off_shortcut": "Work Focus Off" }
+  ]
+}
+```
+
+How this reads, in priority order:
+- Any event on the **On-Call** calendar → **Do Not Disturb** (wins over everything).
+- A **Work** event whose title contains **"night"** → **Sleep** Focus.
+- Any other **Work** event → **Work** Focus.
+
+**Order matters with keywords:** the `"night"` rule must come *before* the generic
+`Work` rule, or the generic rule (which matches any Work event) would catch the
+night shift first. Run `python3 rosterfocus.py --doctor` after editing to confirm
+every calendar and shortcut in your new rules resolves.
+
 ## 5. Grant Calendar access and test (no Shortcuts required yet)
 
 Run it once from Terminal so macOS shows the **Calendar access** prompt — grant it.
