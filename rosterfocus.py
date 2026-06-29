@@ -19,6 +19,7 @@ this works for shift work with no set routine, regardless of location.
 Run every 60s via launchd on an always-on Mac. See SETUP.md.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -26,15 +27,26 @@ import threading
 import subprocess
 from datetime import datetime
 
-try:
-    from EventKit import EKEventStore, EKEntityTypeEvent
-    from Foundation import NSDate
-except ImportError:
-    sys.stderr.write(
-        "[rosterfocus] Missing pyobjc EventKit bindings.\n"
-        "  Install with: pip3 install pyobjc-framework-EventKit\n"
-    )
-    sys.exit(1)
+# EventKit is imported lazily (see ensure_eventkit) so that --help and other
+# argument parsing work even on a machine without the pyobjc bindings installed.
+EKEventStore = EKEntityTypeEvent = NSDate = None
+
+
+def ensure_eventkit():
+    """Import the pyobjc EventKit bindings, or exit with install guidance."""
+    global EKEventStore, EKEntityTypeEvent, NSDate
+    if EKEventStore is not None:
+        return
+    try:
+        from EventKit import EKEventStore as _Store, EKEntityTypeEvent as _Type
+        from Foundation import NSDate as _NSDate
+    except ImportError:
+        sys.stderr.write(
+            "[rosterfocus] Missing pyobjc EventKit bindings.\n"
+            "  Install with: pip3 install pyobjc-framework-EventKit\n"
+        )
+        sys.exit(1)
+    EKEventStore, EKEntityTypeEvent, NSDate = _Store, _Type, _NSDate
 
 
 # --------------------------------------------------------------------------
@@ -123,6 +135,12 @@ def request_access(store):
     return result["ok"]
 
 
+def all_calendar_titles(store):
+    """Return the titles of every calendar EventKit can see, sorted, de-duped."""
+    cals = store.calendarsForEntityType_(EKEntityTypeEvent) or []
+    return sorted({c.title() for c in cals})
+
+
 def active_events_by_calendar(store, calendar_names):
     """Return {calendar_name: [events active now]} for the given calendars.
 
@@ -201,14 +219,82 @@ def run_shortcut(name):
 # --------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------
-def main():
-    cfg, cfg_path = load_config()
-    rules = normalize_rules(cfg)
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(
+        prog="rosterfocus",
+        description="Drive iOS/macOS Focus modes from your shift calendar(s).",
+    )
+    p.add_argument(
+        "--list-calendars",
+        action="store_true",
+        help="Print every calendar RosterFocus can see (verifies access), then exit. "
+        "Does not need a config file.",
+    )
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Evaluate the rules against the real calendar and print what would "
+        "happen, but run no Shortcut and change no state.",
+    )
+    p.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show which events matched while deciding.",
+    )
+    return p.parse_args(argv)
 
+
+def open_store_or_exit():
+    """Create an EventKit store and block on the access prompt; exit on denial."""
+    ensure_eventkit()
     store = EKEventStore.alloc().init()
     if not request_access(store):
-        sys.stderr.write("[rosterfocus] calendar access denied\n")
+        sys.stderr.write(
+            "[rosterfocus] calendar access denied. Grant it in System Settings > "
+            "Privacy & Security > Calendars.\n"
+        )
         sys.exit(1)
+    return store
+
+
+def decide(rules, events_by_cal, now_ts, verbose=False):
+    """Return (desired_focus, desired_rule): the first rule with an active event."""
+    for rule in rules:
+        active = rule_active(rule, events_by_cal, now_ts)
+        if verbose:
+            n = len(events_by_cal.get(rule["calendar"], []))
+            kw = f" keyword='{rule['keyword']}'" if rule["keyword"] else ""
+            print(
+                f"  rule focus='{rule['focus']}' calendar='{rule['calendar']}'{kw}: "
+                f"{n} event(s) in window, active={active}"
+            )
+        if active:
+            return rule["focus"], rule
+    return "", None
+
+
+def main(argv=None):
+    args = parse_args(argv)
+
+    # --list-calendars works without a config so it can be the very first check.
+    if args.list_calendars:
+        store = open_store_or_exit()
+        titles = all_calendar_titles(store)
+        if not titles:
+            print("[rosterfocus] no calendars visible. Is Calendar.app set up on this Mac?")
+        else:
+            print("Calendars RosterFocus can see (use these exact names in config.json):")
+            for t in titles:
+                print(f"  - {t}")
+        return
+
+    cfg, cfg_path = load_config()
+    rules = normalize_rules(cfg)
+    if args.verbose:
+        print(f"[rosterfocus] config: {cfg_path}  ({len(rules)} rule(s))")
+
+    store = open_store_or_exit()
 
     calendars = {r["calendar"] for r in rules}
     events_by_cal = active_events_by_calendar(store, calendars)
@@ -216,18 +302,24 @@ def main():
         sys.exit(1)  # fail safe: don't toggle anything if we can't read calendars
 
     now_ts = datetime.now().timestamp()
-
-    # First rule (highest priority) with an active event wins. iOS allows only
-    # one Focus at a time, so we pick a single desired Focus.
-    desired = ""           # "" means no Focus should be on
-    desired_rule = None
-    for rule in rules:
-        if rule_active(rule, events_by_cal, now_ts):
-            desired = rule["focus"]
-            desired_rule = rule
-            break
-
+    desired, desired_rule = decide(rules, events_by_cal, now_ts, verbose=args.verbose)
     current = read_state()
+
+    if args.dry_run:
+        print(
+            f"[rosterfocus] dry-run: current='{current or 'none'}' "
+            f"desired='{desired or 'none'}'"
+        )
+        if current != desired:
+            if current:
+                prev = next((r for r in rules if r["focus"] == current), None)
+                if prev:
+                    print(f"  would run OFF shortcut: '{prev['off_shortcut']}'")
+            if desired_rule:
+                print(f"  would run ON  shortcut: '{desired_rule['on_shortcut']}'")
+        else:
+            print("  no change; nothing would run.")
+        return
 
     # Only act on a *change*. If you manually override a Focus mid-shift, we
     # won't keep fighting you until the next calendar boundary.

@@ -64,8 +64,9 @@ pure iPhone/Shortcuts automation unreliable, and keying off calendar *events*
    *Work Focus Off*) — these are the only thing that can actually flip a Focus.
 3. `pip3 install pyobjc-framework-EventKit`
 4. Copy `config.example.json` → `~/.config/roster-focus/config.json` and edit it.
-5. Run `python3 rosterfocus.py` once to grant Calendar access.
-6. Schedule it with `launchd`.
+5. `python3 rosterfocus.py --list-calendars` to grant access and confirm names.
+6. `python3 rosterfocus.py --dry-run -v` to see what it *would* do (no toggling).
+7. `python3 rosterfocus.py` for the real run, then schedule it with `launchd`.
 
 Full step-by-step instructions, including the exact Shortcut actions and
 troubleshooting, are in **[SETUP.md](SETUP.md)**.

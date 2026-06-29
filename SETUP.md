@@ -78,16 +78,33 @@ If no rule is active, all Focuses are turned off.
 > The example config uses `_comment` keys for inline notes — they're ignored by
 > the script, so you can leave them in or delete them.
 
-## 5. Grant Calendar access
+## 5. Grant Calendar access and test (no Shortcuts required yet)
 
-Run it once from Terminal so macOS shows the **Calendar access** prompt — grant it:
+Run it once from Terminal so macOS shows the **Calendar access** prompt — grant it.
+The `--list-calendars` flag is the easiest first check: it verifies access and
+prints the exact calendar names to put in your config.
+
+```bash
+python3 ~/Scripts/rosterfocus.py --list-calendars
+```
+
+Then do a **dry run** — this evaluates your rules against the real calendar and
+prints what it *would* do, without running any Shortcut or changing any Focus.
+Add `-v` to see which events matched:
+
+```bash
+python3 ~/Scripts/rosterfocus.py --dry-run -v
+```
+
+If a shift is on your calendar right now you'll see `desired='Work'` (or whichever
+Focus); otherwise `desired='none'`. Once that looks right, a normal run does the
+real toggle:
 
 ```bash
 python3 ~/Scripts/rosterfocus.py
 ```
 
-If a shift is on your calendar right now you'll see `focus -> Work` (or whichever
-Focus); otherwise `focus -> none`. Run it again and it will print nothing — that's
+It prints `focus -> Work` (or `none`). Run it again and it prints nothing — that's
 correct, it only acts on a *change*.
 
 ## 6. Schedule it with launchd (every 60s)
