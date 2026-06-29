@@ -40,9 +40,22 @@ public struct Rule: Codable, Identifiable {
         focus = try c.decode(String.self, forKey: .focus)
         onShortcut = try c.decode(String.self, forKey: .onShortcut)
         offShortcut = try c.decode(String.self, forKey: .offShortcut)
-        leadMinutes = try c.decodeIfPresent(Int.self, forKey: .leadMinutes) ?? 0
-        trailMinutes = try c.decodeIfPresent(Int.self, forKey: .trailMinutes) ?? 0
+        leadMinutes = Rule.flexibleInt(c, .leadMinutes)
+        trailMinutes = Rule.flexibleInt(c, .trailMinutes)
         id = UUID()
+    }
+
+    /// Tolerant numeric decode (Int, Double, or numeric String → Int), matching the
+    /// Python CLI's `int(r.get(...))`, so a hand-edited `"5"` or `5.0` doesn't reject
+    /// the whole config. Absent/unparseable → 0.
+    private static func flexibleInt(_ c: KeyedDecodingContainer<CodingKeys>, _ key: CodingKeys) -> Int {
+        if let i = try? c.decode(Int.self, forKey: key) { return i }
+        if let d = try? c.decode(Double.self, forKey: key) { return Int(d) }
+        if let s = try? c.decode(String.self, forKey: key) {
+            if let i = Int(s) { return i }
+            if let d = Double(s) { return Int(d) }
+        }
+        return 0
     }
 
     public func encode(to encoder: Encoder) throws {

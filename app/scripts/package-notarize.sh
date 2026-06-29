@@ -44,12 +44,20 @@ cat > "$DD/ExportOptions.plist" <<PLIST
   <key>method</key><string>developer-id</string>
   <key>teamID</key><string>$TEAM_ID</string>
   <key>signingStyle</key><string>automatic</string>
+  <key>destination</key><string>export</string>
 </dict></plist>
 PLIST
 xcodebuild -exportArchive -archivePath "$ARCHIVE" \
   -exportPath "$EXPORT" -exportOptionsPlist "$DD/ExportOptions.plist"
 
 APP="$EXPORT/RosterFocus.app"
+
+# Fail fast — before the multi-minute notary wait — if the export isn't a
+# hardened-runtime, Developer ID-signed binary.
+echo "==> Pre-flight signature check…"
+SIG="$(codesign -dvvv "$APP" 2>&1 || true)"
+echo "$SIG" | grep -q 'flags=.*runtime' || { echo "ERROR: app is not hardened-runtime signed"; exit 1; }
+echo "$SIG" | grep -q 'Authority=Developer ID Application' || { echo "ERROR: app is not Developer ID signed"; exit 1; }
 
 echo "==> Notarizing (this waits for Apple)…"
 ditto -c -k --keepParent "$APP" "$DD/RosterFocus.zip"

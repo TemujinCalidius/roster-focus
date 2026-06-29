@@ -15,6 +15,7 @@ public final class Scheduler {
     private let shortcuts: ShortcutsService
     private let interval: TimeInterval
     private var timer: Timer?
+    private var ticking = false
 
     /// Called after each tick that changes anything (or fails), for the UI to observe.
     public var onStatus: ((Status) -> Void)?
@@ -31,9 +32,9 @@ public final class Scheduler {
 
     public func start() {
         stop()
-        tick()
+        Task { @MainActor in await self.tick() }
         let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.tick() }
+            Task { @MainActor in await self?.tick() }
         }
         RunLoop.main.add(t, forMode: .common)
         timer = t
@@ -44,9 +45,27 @@ public final class Scheduler {
         timer = nil
     }
 
-    /// One evaluation. Safe to call manually (e.g. a "Check now" menu item).
-    public func tick() {
-        let rules = ConfigStore.loadOrEmpty().rules
+    /// One evaluation. Safe to call manually (e.g. a "Check Now" menu item).
+    /// Re-entrancy guarded so a slow tick can't overlap the next.
+    public func tick() async {
+        guard !ticking else { return }
+        ticking = true
+        defer { ticking = false }
+
+        // Distinguish "no config yet" (silent) from "config present but invalid" (report).
+        let rules: [Rule]
+        if FileManager.default.fileExists(atPath: ConfigStore.configURL.path) {
+            do {
+                rules = try ConfigStore.load().rules
+            } catch {
+                onStatus?(Status(currentFocus: FocusStateFile.read(),
+                                 lastAction: "config error",
+                                 lastError: "config.json couldn't be read: \(error.localizedDescription)"))
+                return
+            }
+        } else {
+            return
+        }
         guard !rules.isEmpty else { return }
 
         let names = Set(rules.map { $0.calendar })
@@ -59,13 +78,16 @@ public final class Scheduler {
         let current = FocusStateFile.read()
         guard current != desired else { return }   // act only on change
 
-        let prevRule = rules.first { $0.focus == current }
+        // Mirror the Python `if current` guard: an empty current means no previous rule.
+        let prevRule = current.isEmpty ? nil : rules.first { $0.focus == current }
+        let known = await shortcuts.list()         // fetch once per change
+
         let ok: Bool
         if let dr = desiredRule {
-            if let pr = prevRule { _ = shortcuts.runShortcut(pr.offShortcut) }  // best-effort
-            ok = shortcuts.runShortcut(dr.onShortcut)                            // must succeed
+            if let pr = prevRule { _ = await shortcuts.runShortcut(pr.offShortcut, known: known) }  // best-effort
+            ok = await shortcuts.runShortcut(dr.onShortcut, known: known)                           // must succeed
         } else if let pr = prevRule {
-            ok = shortcuts.runShortcut(pr.offShortcut)                           // turning off
+            ok = await shortcuts.runShortcut(pr.offShortcut, known: known)                          // turning off
         } else {
             ok = true
         }

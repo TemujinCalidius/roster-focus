@@ -14,8 +14,10 @@ final class AppModel: ObservableObject {
     @Published var calendars: [String] = []
     @Published var availableShortcuts: [String] = []
     @Published var rules: [Rule] = []
+    @Published var rulesDirty: Bool = false
     @Published var loginItemEnabled: Bool = LoginItem.isEnabled
 
+    private var savedSnapshot: [Rule] = []
     private let eventKit = EventKitService()
     private let shortcuts = ShortcutsService()
     private lazy var scheduler = Scheduler(eventKit: eventKit, shortcuts: shortcuts)
@@ -48,22 +50,47 @@ final class AppModel: ObservableObject {
     func refreshCalendars() { calendars = eventKit.allCalendarTitles() }
 
     func refreshShortcuts() {
-        availableShortcuts = shortcuts.list().map { $0.sorted() } ?? []
+        Task { availableShortcuts = (await shortcuts.list()).map { $0.sorted() } ?? [] }
     }
 
-    // MARK: Rules
-    func loadRules() { rules = ConfigStore.loadOrEmpty().rules }
+    func refreshLoginItem() { loginItemEnabled = LoginItem.isEnabled }
 
-    func saveRules() { try? ConfigStore.save(Config(rules: rules)) }
+    func refreshCurrentFocus() { currentFocus = FocusStateFile.read() }
+
+    // MARK: Rules
+    func loadRules() {
+        rules = ConfigStore.loadOrEmpty().rules
+        savedSnapshot = rules
+        rulesDirty = false
+    }
+
+    func saveRules() {
+        do {
+            try ConfigStore.save(Config(rules: rules))
+            savedSnapshot = rules
+            rulesDirty = false
+            lastError = nil
+            lastAction = "Rules saved"
+        } catch {
+            lastError = "Could not save rules: \(error.localizedDescription)"
+        }
+    }
+
+    /// Recompute the unsaved-changes flag (call on any edit to model.rules).
+    func markRulesChanged() { rulesDirty = (rules != savedSnapshot) }
 
     func addRule() {
         rules.append(Rule(calendar: calendars.first ?? "Work",
                           focus: "Work",
                           onShortcut: "Work Focus On",
                           offShortcut: "Work Focus Off"))
+        markRulesChanged()
     }
 
-    func removeRule(_ rule: Rule) { rules.removeAll { $0.id == rule.id } }
+    func removeRule(_ rule: Rule) {
+        rules.removeAll { $0.id == rule.id }
+        markRulesChanged()
+    }
 
     // MARK: Run control
     func setEnabled(_ on: Bool) {
@@ -72,7 +99,11 @@ final class AppModel: ObservableObject {
         if on { scheduler.start() } else { scheduler.stop() }
     }
 
-    func checkNow() { scheduler.tick() }
+    /// Evaluate now. Saves unsaved rule edits first so "Check Now" tests what's on screen.
+    func checkNow() {
+        if rulesDirty { saveRules() }
+        Task { await scheduler.tick() }
+    }
 
     // MARK: Login item
     func setLoginItem(_ on: Bool) {

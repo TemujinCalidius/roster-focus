@@ -12,16 +12,14 @@ private struct ComboField: View {
         HStack(spacing: 4) {
             TextField(placeholder, text: $selection).textFieldStyle(.roundedBorder)
             Menu {
-                if options.isEmpty {
-                    Text("none found")
-                } else {
-                    ForEach(options, id: \.self) { opt in
-                        Button(opt) { selection = opt }
-                    }
+                ForEach(options, id: \.self) { opt in
+                    Button(opt) { selection = opt }
                 }
             } label: { Image(systemName: "chevron.down") }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
+                .disabled(options.isEmpty)
+                .accessibilityLabel("Choose \(placeholder)")
         }
     }
 }
@@ -91,7 +89,7 @@ struct RulesEditorView: View {
                                 shortcuts: model.availableShortcuts,
                                 onDelete: { model.removeRule(rule) })
                     }
-                    .onMove { model.rules.move(fromOffsets: $0, toOffset: $1) }
+                    .onMove { model.rules.move(fromOffsets: $0, toOffset: $1); model.markRulesChanged() }
                 }
                 .listStyle(.inset)
             }
@@ -99,11 +97,17 @@ struct RulesEditorView: View {
             HStack {
                 Button("Save") { model.saveRules() }.keyboardShortcut("s")
                 Button("Reload from disk") { model.loadRules() }
+                if model.rulesDirty {
+                    Label("Unsaved changes", systemImage: "circle.fill")
+                        .font(.caption).foregroundStyle(.orange).labelStyle(.titleAndIcon)
+                        .imageScale(.small)
+                }
                 Spacer()
                 Text("Config: ~/.config/roster-focus/config.json")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
+        .onChange(of: model.rules) { model.markRulesChanged() }
         .onAppear { model.refreshCalendars(); model.refreshShortcuts() }
     }
 }

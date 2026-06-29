@@ -22,4 +22,12 @@ final class ShortcutsParseTests: XCTestCase {
         XCTAssertFalse(names.contains(""))                         // blank line dropped
         XCTAssertEqual(names.count, 5)
     }
+
+    /// CRLF output must still split into clean names (Swift treats "\r\n" as one
+    /// Character, so a naive split on "\n" would not split it).
+    func testParseHandlesCRLF() {
+        let names = ShortcutsService.parseList("Work Focus On\r\nDeep Work\r\n")
+        XCTAssertEqual(names, ["Work Focus On", "Deep Work"])
+        XCTAssertFalse(names.contains("Work Focus On\r"))   // no stray carriage return
+    }
 }

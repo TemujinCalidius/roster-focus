@@ -3,7 +3,7 @@ import RosterFocusCore
 
 struct SetupWizardView: View {
     @ObservedObject var model: AppModel
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismissWindow) private var dismissWindow
     @State private var step = 0
 
     private let titles = ["Calendar Access", "Create a Focus", "Add Shortcuts", "Rules", "Enable"]
@@ -16,7 +16,12 @@ struct SetupWizardView: View {
             Divider()
             footer
         }
-        .onAppear { model.refreshAuthorization(); model.refreshShortcuts() }
+        .onAppear {
+            step = 0
+            model.refreshAuthorization()
+            model.refreshShortcuts()
+            model.refreshLoginItem()
+        }
     }
 
     private var header: some View {
@@ -51,7 +56,7 @@ struct SetupWizardView: View {
             if step < titles.count - 1 {
                 Button("Next") { step += 1 }.keyboardShortcut(.defaultAction)
             } else {
-                Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+                Button("Done") { dismissWindow(id: "setup") }.keyboardShortcut(.defaultAction)
             }
         }
         .padding(12)

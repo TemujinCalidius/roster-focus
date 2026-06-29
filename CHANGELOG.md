@@ -16,6 +16,10 @@ All notable changes to RosterFocus are documented here.
     notarytool → staple) for distribution.
   - Not sandboxed (must exec `/usr/bin/shortcuts` and read `~/.config`), hardened
     runtime on for notarization.
+  - Hardened after a multi-agent review: subprocess work moved off the main actor
+    (no UI hang) with concurrent pipe draining (no two-pipe deadlock); fail-fast
+    notarize pre-flight check; tolerant config/state parsing; a save-error + unsaved-
+    changes indicator; reliable wizard window close; and assorted UI-staleness fixes.
 
 ### Notes
 - The CLI is unchanged and remains the recommended path for **headless** Macs. Don't

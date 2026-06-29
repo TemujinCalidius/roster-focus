@@ -59,4 +59,18 @@ final class ConfigRoundTripTests: XCTestCase {
         let decoded = try JSONDecoder().decode(Config.self, from: data)
         XCTAssertEqual(decoded.rules, original.rules)   // content equality (ignores id)
     }
+
+    /// Numeric fields are coerced from Int, Double, or numeric String (matching the
+    /// Python CLI's int()), so a hand-edited quoted number doesn't reject the config.
+    func testTolerantNumericDecode() throws {
+        let json = """
+        {"rules":[
+          {"calendar":"Work","focus":"Work","on_shortcut":"On","off_shortcut":"Off",
+           "lead_minutes":"5","trail_minutes":10.0}
+        ]}
+        """
+        let cfg = try JSONDecoder().decode(Config.self, from: Data(json.utf8))
+        XCTAssertEqual(cfg.rules[0].leadMinutes, 5)    // "5" string → 5
+        XCTAssertEqual(cfg.rules[0].trailMinutes, 10)  // 10.0 double → 10
+    }
 }
