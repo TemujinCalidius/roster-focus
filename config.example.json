@@ -1,0 +1,35 @@
+{
+  "_comment": "Copy this to ~/.config/roster-focus/config.json and edit. Rules are evaluated TOP TO BOTTOM; the first rule with an event active right now wins (iOS allows only one Focus at a time). If no rule is active, all Focuses are turned off.",
+
+  "rules": [
+    {
+      "_comment": "On-call shifts take priority over normal work shifts, so it is listed first.",
+      "calendar": "On-Call",
+      "keyword": "",
+      "focus": "Do Not Disturb",
+      "on_shortcut": "DND On",
+      "off_shortcut": "DND Off",
+      "lead_minutes": 0,
+      "trail_minutes": 0
+    },
+    {
+      "calendar": "Work",
+      "keyword": "",
+      "focus": "Work",
+      "on_shortcut": "Work Focus On",
+      "off_shortcut": "Work Focus Off",
+      "lead_minutes": 5,
+      "trail_minutes": 0
+    },
+    {
+      "_comment": "keyword matches a case-insensitive substring of the event title, so only 'Gym ...' events on the Personal calendar trigger this one.",
+      "calendar": "Personal",
+      "keyword": "gym",
+      "focus": "Fitness",
+      "on_shortcut": "Fitness Focus On",
+      "off_shortcut": "Fitness Focus Off",
+      "lead_minutes": 0,
+      "trail_minutes": 0
+    }
+  ]
+}

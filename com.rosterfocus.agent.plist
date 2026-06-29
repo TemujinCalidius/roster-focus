@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rosterfocus.agent</string>
+    <key>ProgramArguments</key>
+    <array>
+        <!-- Point this at a python3 that has pyobjc-framework-EventKit installed.
+             Find it with: which python3   (or your venv's bin/python3) -->
+        <string>/usr/bin/python3</string>
+        <string>/Users/USERNAME/Scripts/rosterfocus.py</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>60</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/rosterfocus.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/rosterfocus.err.log</string>
+</dict>
+</plist>

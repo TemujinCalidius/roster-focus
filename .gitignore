@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Runtime / local config (never commit your real calendar/focus setup)
+*.log
+config.json
+state.json
