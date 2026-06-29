@@ -190,10 +190,14 @@ launchctl unload ~/Library/LaunchAgents/com.rosterfocus.agent.plist
   can't pre-authorize an interpreter there; you must let it prompt once.
   Run `--doctor` to see the exact authorization state (`NotDetermined`, `Denied`,
   `Authorized`, …) and what to do about it.
-- **launchd still says `calendar access denied` after granting?** The grant is
-  tied to the interpreter binary; if the agent runs a *different* python than the
-  one you granted, it won't inherit access. Make the plist point at the exact same
-  venv python you ran `--list-calendars` with, then reload the agent.
+  **Good news:** this interactive grant is needed only **once**. After it, the
+  launchd agent running the *same* venv python inherits the access and runs
+  unattended — confirmed on a headless Mac mini, toggling both ways on the 60s
+  timer with no further prompts.
+- **launchd says `calendar access denied` after granting?** The grant is tied to
+  the interpreter binary, so the agent must run the **exact same** venv python you
+  ran `--list-calendars` with — not `/usr/bin/python3` or a different venv. Point
+  the plist at that interpreter (install.sh does this for you) and reload the agent.
 - **"none of the configured calendars were found".** The `calendar` name in your
   config must match the calendar title exactly (case-sensitive). RosterFocus
   fails safe here — if it can't read any configured calendar it does nothing
