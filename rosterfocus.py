@@ -27,7 +27,7 @@ import threading
 import subprocess
 from datetime import datetime
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # EventKit is imported lazily (see ensure_eventkit) so that --help and other
 # argument parsing work even on a machine without the pyobjc bindings installed.

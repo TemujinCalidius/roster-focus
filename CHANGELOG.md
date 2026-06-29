@@ -2,6 +2,15 @@
 
 All notable changes to RosterFocus are documented here.
 
+## [0.2.1] — 2026-06-30
+
+### Added
+- Prebuilt, signed **Work Focus On/Off** shortcuts under `shortcuts/`, so you can
+  import the pair instead of hand-building them. Includes editable XML sources, a
+  `build.sh` to re-sign, and a README covering the Focus-identifier caveat.
+  Verified on a Mac mini: both import bound to the built-in Work Focus and toggle
+  it on/off.
+
 ## [0.2.0] — 2026-06-30
 
 First version verified end-to-end on a real always-on Mac mini (calendar → Focus

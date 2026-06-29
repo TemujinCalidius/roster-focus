@@ -56,6 +56,7 @@ pure iPhone/Shortcuts automation unreliable, and keying off calendar *events*
 | `config.example.json` | Annotated config template (calendars → Focus mappings) |
 | `install.sh` | One-shot installer: venv + bindings, config scaffold, launchd agent |
 | `com.rosterfocus.agent.plist` | `launchd` template (runs the poller every 60s) |
+| `shortcuts/` | Prebuilt, signed **Work Focus On/Off** shortcuts (import instead of hand-building) |
 | `SETUP.md` | Full setup: Shortcuts, install, permissions, troubleshooting |
 
 ## Quick start

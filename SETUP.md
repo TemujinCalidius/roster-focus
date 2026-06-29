@@ -48,6 +48,11 @@ rather not use it.
 
 ## 2. Build your Shortcuts (on the Mac)
 
+> **Shortcut for the Work Focus:** if you use the built-in **Work** Focus, you can
+> skip the manual build — import the prebuilt pair in [`shortcuts/`](shortcuts/)
+> (`open "shortcuts/Work Focus On.shortcut"` → *Add Shortcut*). See
+> [shortcuts/README.md](shortcuts/README.md). For any other Focus, build it by hand below.
+
 Open **Shortcuts.app**. For **each Focus** you want to automate, create a matching
 pair of shortcuts. These are the only thing that can actually flip a Focus — the
 script just calls them by name.
