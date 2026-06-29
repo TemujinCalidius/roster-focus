@@ -10,7 +10,7 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     SWIFT_STRICT_CONCURRENCY: minimal
-    DEVELOPMENT_TEAM: ""        # set to your Apple Developer Team ID for Developer ID signing
+    DEVELOPMENT_TEAM: "94H2K6T787"   # Apple Developer Team ID (for Developer ID signing)
     CODE_SIGN_STYLE: Automatic
 
 targets:
