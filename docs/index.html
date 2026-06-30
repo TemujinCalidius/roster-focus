@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RosterFocus — Focus modes from your shift calendar</title>
+<meta name="description" content="RosterFocus turns macOS/iOS Focus modes on and off automatically from your work-shift calendar. No fixed schedule required. Free, open-source, notarized.">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<meta property="og:title" content="RosterFocus">
+<meta property="og:description" content="Turn macOS/iOS Focus modes on and off automatically from your shift calendar.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --indigo:#6A5BF7; --violet:#8A4FF0; --purple:#C158EE;
+    --ink:#0e0b1a; --ink2:#161229; --card:#1d1734; --line:#2c2447;
+    --text:#ece9f6; --muted:#a99fce;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--text);background:var(--ink);-webkit-font-smoothing:antialiased}
+  a{color:#c9b8ff;text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+  .btn{display:inline-block;padding:13px 22px;border-radius:12px;font-weight:600;border:1px solid transparent}
+  .btn-primary{background:linear-gradient(135deg,var(--indigo),var(--purple));color:#fff;box-shadow:0 8px 30px rgba(138,79,240,.35)}
+  .btn-primary:hover{text-decoration:none;filter:brightness(1.07)}
+  .btn-ghost{border-color:var(--line);color:var(--text)} .btn-ghost:hover{text-decoration:none;border-color:#4a3f73}
+  .muted{color:var(--muted)}
+  /* hero */
+  header.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  header.hero .bg{position:absolute;inset:0;background:url('assets/hero.jpg') center/cover no-repeat;opacity:.5;
+       -webkit-mask-image:linear-gradient(180deg,#000 30%,transparent);mask-image:linear-gradient(180deg,#000 30%,transparent)}
+  header.hero .inner{position:relative;text-align:center;padding:84px 22px 64px}
+  header.hero img.icon{width:108px;height:108px;border-radius:24px;box-shadow:0 16px 50px rgba(110,92,247,.5)}
+  h1{font-size:clamp(34px,6vw,58px);margin:18px 0 6px;letter-spacing:-.02em}
+  .tag{font-size:clamp(17px,2.4vw,22px);color:#d9d2f4;margin:0 auto 26px;max-width:620px}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .sub{margin-top:14px;font-size:14px}
+  /* sections */
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:clamp(24px,3.4vw,34px);letter-spacing:-.01em;margin:0 0 8px}
+  .lead{color:var(--muted);max-width:680px;margin:0 0 28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .card h3{margin:0 0 6px;font-size:17px} .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .how{display:grid;grid-template-columns:1.1fr 1fr;gap:34px;align-items:center}
+  .how img{width:100%;border-radius:18px;border:1px solid var(--line)}
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:14px}
+  ol.steps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:14px;
+       padding:16px 18px 16px 58px;position:relative}
+  ol.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;
+       display:grid;place-items:center;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--indigo),var(--purple))}
+  ol.steps b{color:#fff}
+  code{background:#221b3d;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px}
+  footer{padding:40px 0 64px;text-align:center;color:var(--muted)}
+  footer a{margin:0 10px;white-space:nowrap}
+  .note{font-size:13px;color:#8d83b0;margin-top:26px}
+  @media(max-width:720px){.how{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="bg" aria-hidden="true"></div>
+  <div class="inner wrap">
+    <img class="icon" src="assets/icon-showcase.jpg" alt="RosterFocus app icon">
+    <h1>RosterFocus</h1>
+    <p class="tag">Turn macOS &amp; iOS <strong>Focus modes</strong> on and off automatically from your <strong>shift calendar</strong> — no fixed schedule required.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/TemujinCalidius/roster-focus/releases/latest">⬇︎ Download for macOS</a>
+      <a class="btn btn-ghost" href="https://github.com/TemujinCalidius/roster-focus">View on GitHub</a>
+    </div>
+    <div class="sub muted">Free &amp; open-source · macOS 14+ · Developer ID-signed &amp; notarized</div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Built for shift work</h2>
+    <p class="lead">Shifts that move around — different days, hours, locations — don't fit Apple's
+      time- or location-based Focus automations. RosterFocus reads your shift <em>events</em> from a
+      calendar and flips the right Focus while you're on shift, then off when it ends. It follows you
+      to your iPhone via <em>Share Across Devices</em>.</p>
+    <div class="grid">
+      <div class="card"><h3>🗓️ Shift-aware</h3><p>Triggers on calendar events — variable days, hours, and overnight or multi-day shifts.</p></div>
+      <div class="card"><h3>🌙 Multiple Focuses</h3><p>Map calendars and title keywords to different Focus modes: On-Call → Do Not Disturb, Work → Work, Gym → Fitness.</p></div>
+      <div class="card"><h3>⏱️ Lead / trail padding</h3><p>Start a Focus a few minutes before a shift, or hold it for a while after.</p></div>
+      <div class="card"><h3>🤚 Respects you</h3><p>Acts only on a change — kill a Focus mid-shift and it stays off until the next boundary.</p></div>
+      <div class="card"><h3>🖥️ App or CLI</h3><p>A friendly menu-bar app, or a headless CLI for an always-on Mac mini. Same engine, shared config.</p></div>
+      <div class="card"><h3>🔒 Private &amp; local</h3><p>Runs entirely on your Mac. No accounts, no servers. Open-source and MIT-licensed.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap how">
+    <img src="assets/how-it-works.jpg" alt="A moon and clock above a calendar grid">
+    <div>
+      <h2>How it works</h2>
+      <p class="lead">Apple lets only the <strong>Shortcuts</strong> app flip a Focus, and no app can
+        create one. So RosterFocus automates the part it can — watching your calendar and deciding
+        which Focus should be on — and runs a Shortcut you set up to do the toggle. The Focus then
+        syncs to your iPhone.</p>
+      <p class="muted" style="font-size:14px">shift calendar → decide the Focus → run your Shortcut → syncs to iPhone</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Set it up in about 5 minutes</h2>
+    <p class="lead">The app's wizard walks you through it. A few one-time steps that only you can do
+      (macOS has no API for them):</p>
+    <ol class="steps">
+      <li><b>Download &amp; open.</b> Get the DMG, drag RosterFocus to Applications, launch it — a 🌙 appears in your menu bar.</li>
+      <li><b>Grant Calendar access.</b> The wizard asks; approve the system prompt.</li>
+      <li><b>Create a Focus.</b> In System Settings → Focus, add one named e.g. <code>Work</code> (the wizard opens this for you).</li>
+      <li><b>Add the Shortcuts.</b> Import the ready-made <em>Work Focus On/Off</em> pair, or build your own.</li>
+      <li><b>Add a rule.</b> Point your shift calendar at that Focus — pick from dropdowns.</li>
+      <li><b>Share to iPhone.</b> Turn on <em>Settings → Focus → Share Across Devices</em> on both devices.</li>
+    </ol>
+    <p style="margin-top:24px">
+      <a class="btn btn-primary" href="https://github.com/TemujinCalidius/roster-focus/releases/latest">⬇︎ Download RosterFocus</a>
+      &nbsp;
+      <a class="btn btn-ghost" href="https://github.com/TemujinCalidius/roster-focus/blob/main/SETUP.md">Full setup guide</a>
+    </p>
+    <p class="note">Not affiliated with Apple. “Focus”, “Shortcuts”, macOS and iOS are trademarks of Apple Inc.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="https://github.com/TemujinCalidius/roster-focus">GitHub</a>
+    <a href="https://github.com/TemujinCalidius/roster-focus/discussions">Discussions</a>
+    <a href="https://github.com/sponsors/TemujinCalidius">💜 Sponsor</a>
+    <a href="https://github.com/TemujinCalidius/roster-focus/blob/main/LICENSE">MIT License</a>
+    <p style="margin-top:18px;font-size:13px">© 2026 Samuel Lison</p>
+  </div>
+</footer>
+
+</body>
+</html>
