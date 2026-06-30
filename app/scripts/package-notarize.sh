@@ -59,6 +59,13 @@ cp -R "$APP" "$STAGING/"
 ln -s /Applications "$STAGING/Applications"
 hdiutil create -volname "RosterFocus" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
 
+# Notarize + staple the DMG itself too, so it opens cleanly even after a
+# download/AirDrop adds the quarantine attribute (the app inside is already stapled).
+echo "==> Notarizing the DMG…"
+xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
+xcrun stapler staple "$DMG"
+spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG" || true
+
 echo "==> Done."
-echo "    App: $APP  (notarized + stapled)"
-echo "    DMG: $DMG  (drag-to-Applications installer)"
+echo "    App: $APP        (notarized + stapled)"
+echo "    DMG: $DMG  (notarized + stapled, drag-to-Applications installer)"
