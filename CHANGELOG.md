@@ -4,17 +4,19 @@ All notable changes to RosterFocus are documented here.
 
 ## Unreleased
 
+## [1.0.0] — 2026-06-30
+
+First stable release. The native **menu-bar app** debuts (device-verified, Developer
+ID-signed + notarized) alongside the existing Python CLI, with an app icon and full
+contributor/security infrastructure.
+
 ### Added
 - **App icon** — a crescent moon (Focus) + clock (shift/time) on a gradient squircle,
   authored as an SVG and rendered to the macOS AppIcon set (`app/icon/`).
 - **Contributor & security infrastructure**: `CONTRIBUTING.md`, `SECURITY.md`, PR + issue
   templates, `FUNDING.yml`, Dependabot (GitHub Actions), and CI workflows (Swift tests +
   Python/script checks, CHANGELOG enforcement, release/announce). `dev`/`main` branching model.
-
-## [0.3.0] — 2026-06-30
-
-### Added
-- **Native macOS menu-bar app** under `app/` (SwiftUI, Xcode 26 / macOS 14+). A
+- **Native macOS menu-bar app** under `app/` (SwiftUI, macOS 14+). A
   click-through setup wizard (calendar access → create Focus → import Shortcuts →
   rules editor with dropdowns → enable + launch at login) and a background scheduler
   that runs the exact same decision logic as the CLI. Shares the CLI's config file.
