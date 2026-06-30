@@ -2,6 +2,45 @@
 
 All notable changes to RosterFocus are documented here.
 
+## Unreleased
+
+### Added
+- **App icon** — a crescent moon (Focus) + clock (shift/time) on a gradient squircle,
+  authored as an SVG and rendered to the macOS AppIcon set (`app/icon/`).
+- **Contributor & security infrastructure**: `CONTRIBUTING.md`, `SECURITY.md`, PR + issue
+  templates, `FUNDING.yml`, Dependabot (GitHub Actions), and CI workflows (Swift tests +
+  Python/script checks, CHANGELOG enforcement, release/announce). `dev`/`main` branching model.
+
+## [0.3.0] — 2026-06-30
+
+### Added
+- **Native macOS menu-bar app** under `app/` (SwiftUI, Xcode 26 / macOS 14+). A
+  click-through setup wizard (calendar access → create Focus → import Shortcuts →
+  rules editor with dropdowns → enable + launch at login) and a background scheduler
+  that runs the exact same decision logic as the CLI. Shares the CLI's config file.
+  - `RosterFocusCore` framework holds the pure logic + services; unit-tested
+    (Decider priority/keyword/lead-trail, config round-trip, shortcut-list parsing).
+  - XcodeGen `project.yml` + committed `.xcodeproj`; `scripts/build-local.sh`
+    (ad-hoc, hardened runtime) and `scripts/package-notarize.sh` (Developer ID →
+    notarytool → staple) for distribution.
+  - Not sandboxed (must exec `/usr/bin/shortcuts` and read `~/.config`), hardened
+    runtime on for notarization.
+  - Hardened after a multi-agent review: subprocess work moved off the main actor
+    (no UI hang) with concurrent pipe draining (no two-pipe deadlock); fail-fast
+    notarize pre-flight check; tolerant config/state parsing; a save-error + unsaved-
+    changes indicator; reliable wizard window close; and assorted UI-staleness fixes.
+  - **Fixed the Calendar/Shortcuts permission prompt never appearing.** A hardened-
+    runtime app must carry `com.apple.security.personal-information.calendars` (and,
+    for running Shortcuts, `com.apple.security.automation.apple-events`) or macOS
+    silently refuses to prompt. Added both entitlements + an Apple Events usage
+    string, and the setup window now becomes a foreground app so the prompts can
+    actually display (a background menu-bar agent can't present them). Root-caused
+    from the live TCC logs.
+
+### Notes
+- The CLI is unchanged and remains the recommended path for **headless** Macs. Don't
+  run the app and the launchd CLI agent simultaneously — disable the agent first.
+
 ## [0.2.1] — 2026-06-30
 
 ### Added

@@ -1,0 +1,32 @@
+name: Release
+
+# On a version tag, publish the GitHub Release with auto-generated notes and
+# cross-post it to Discussions → Announcements.
+#
+# Note: the distributable is the *notarized* RosterFocus.dmg, which is built
+# locally (CI doesn't hold the Developer ID signing + notary secrets):
+#   cd app && ./scripts/package-notarize.sh
+# Attach it when cutting the tag, e.g.
+#   gh release create vX.Y.Z app/build-release/RosterFocus.dmg \
+#     --discussion-category Announcements --title "RosterFocus vX.Y.Z" --notes-file NOTES
+# This workflow then just ensures the release notes + announcement exist.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  discussions: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish release + announce
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          discussion_category_name: Announcements
+          # rc / beta tags (e.g. v1.1.0-rc1) are marked as pre-releases automatically.
+          prerelease: ${{ contains(github.ref_name, '-') }}

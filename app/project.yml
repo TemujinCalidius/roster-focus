@@ -1,0 +1,72 @@
+name: RosterFocus
+options:
+  bundleIdPrefix: com.rosterfocus
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "0.3.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    DEVELOPMENT_TEAM: "94H2K6T787"   # Apple Developer Team ID (for Developer ID signing)
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  # Pure logic + services, in a framework so the unit tests can @testable import
+  # it and run WITHOUT a GUI app host.
+  RosterFocusCore:
+    type: framework
+    platform: macOS
+    sources: [RosterFocusCore]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rosterfocus.core
+        GENERATE_INFOPLIST_FILE: YES
+        SKIP_INSTALL: NO
+
+  RosterFocus:
+    type: application
+    platform: macOS
+    sources:
+      - RosterFocus
+      - path: "../shortcuts/Work Focus On.shortcut"
+        buildPhase: resources
+      - path: "../shortcuts/Work Focus Off.shortcut"
+        buildPhase: resources
+    dependencies:
+      - target: RosterFocusCore
+        embed: true
+    settings:
+      base:
+        INFOPLIST_FILE: RosterFocus/Info.plist
+        CODE_SIGN_ENTITLEMENTS: RosterFocus/RosterFocus.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.rosterfocus.app
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  RosterFocusTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [RosterFocusTests]
+    dependencies:
+      - target: RosterFocusCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rosterfocus.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  RosterFocus:
+    build:
+      targets:
+        RosterFocus: all
+        RosterFocusTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - RosterFocusTests

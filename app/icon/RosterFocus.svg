@@ -1,0 +1,31 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- userSpaceOnUse so the carve-circle's gradient lines up exactly with the background -->
+    <linearGradient id="bg" gradientUnits="userSpaceOnUse" x1="180" y1="120" x2="860" y2="900">
+      <stop offset="0" stop-color="#6A5BF7"/>
+      <stop offset="0.55" stop-color="#8A4FF0"/>
+      <stop offset="1" stop-color="#C158EE"/>
+    </linearGradient>
+    <linearGradient id="sheen" gradientUnits="userSpaceOnUse" x1="512" y1="100" x2="512" y2="600">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App tile (macOS icon grid: 824 square, 100 margin, ~22% corner radius) -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#sheen)"/>
+
+  <!-- Crescent moon (Focus): white disc carved by a background-gradient disc offset up-right -->
+  <circle cx="452" cy="520" r="262" fill="#ffffff"/>
+  <circle cx="612" cy="392" r="250" fill="url(#bg)"/>
+
+  <!-- Clock (shift / time): sits in the crescent opening, on the background -->
+  <g>
+    <circle cx="648" cy="650" r="150" fill="url(#bg)" stroke="#ffffff" stroke-width="34"/>
+    <!-- hands: ~10:10 -->
+    <line x1="648" y1="650" x2="648" y2="556" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <line x1="648" y1="650" x2="724" y2="690" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="648" cy="650" r="26" fill="#ffffff"/>
+  </g>
+</svg>
