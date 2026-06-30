@@ -12,6 +12,7 @@
 		26C2186B13A6BBA61CE38D1C /* SetupWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0342C8BFD2E2FD3B8F3D1B28 /* SetupWizardView.swift */; };
 		35845A197F6833C26A6E059C /* MenuBarContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB5A9EF1EF0D998EEC398D9 /* MenuBarContent.swift */; };
 		3ADEE6A39B80F8D3AC40B7EA /* RulesEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD572195EB1F2F78DDC20C1E /* RulesEditorView.swift */; };
+		3FB748B1B576297F6CA372AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3299FCB433F88EC212ED2987 /* Assets.xcassets */; };
 		4D146A3CF2B646926492C6CE /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 201D5D6102CBB099728BEAFE /* LoginItem.swift */; };
 		6C11ECEC5D91B5F2E7882689 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67EDBC7DB6EAB1EF8CE7644 /* ConfigStore.swift */; };
 		7263B3310F1503EBD877584D /* Work Focus On.shortcut in Resources */ = {isa = PBXBuildFile; fileRef = 853C84F7F774B03FBA45D2B7 /* Work Focus On.shortcut */; };
@@ -82,6 +83,7 @@
 		18303DF963525B8133FBFF17 /* RosterFocusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RosterFocusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		201D5D6102CBB099728BEAFE /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
 		24DE4E29DEC63918C6A557D5 /* ShortcutsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsService.swift; sourceTree = "<group>"; };
+		3299FCB433F88EC212ED2987 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		34B2CF3B0984A47F0EDD3332 /* EventKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitService.swift; sourceTree = "<group>"; };
 		36CC38DEA4FD0CF87D3F6891 /* Rule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rule.swift; sourceTree = "<group>"; };
 		576D4DEA417A9025F2A77A34 /* RosterFocusCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RosterFocusCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -200,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				F05469856E6480C435DD7E47 /* AppModel.swift */,
+				3299FCB433F88EC212ED2987 /* Assets.xcassets */,
 				ED1C9132A42B5E51862DC04A /* Info.plist */,
 				12CD41115AE88052A421833F /* RosterFocus.entitlements */,
 				CF03FC9E872654479E86E34A /* RosterFocusApp.swift */,
@@ -318,6 +321,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3FB748B1B576297F6CA372AA /* Assets.xcassets in Resources */,
 				BACFE7D7CD577EEF840F3E08 /* Work Focus Off.shortcut in Resources */,
 				7263B3310F1503EBD877584D /* Work Focus On.shortcut in Resources */,
 			);
