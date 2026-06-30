@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cross-post release to Discussions → Announcements
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           discussion_category_name: Announcements
           # rc / beta tags (e.g. v1.1.0-rc1) are marked as pre-releases.
