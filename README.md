@@ -18,7 +18,7 @@
 
 <p align="center">
   <a href="https://temujincalidius.github.io/roster-focus/"><b>🌐 Website</b></a> ·
-  <a href="https://github.com/TemujinCalidius/roster-focus/releases/latest"><b>⬇️ Download</b></a> ·
+  <a href="https://github.com/TemujinCalidius/roster-focus/releases/latest/download/RosterFocus.dmg"><b>⬇️ Download</b></a> ·
   <a href="SETUP.md"><b>Setup guide</b></a> ·
   <a href="https://github.com/TemujinCalidius/roster-focus/discussions"><b>Discussions</b></a>
 </p>
@@ -33,7 +33,7 @@ irregular your roster is, and the Focus follows you to your iPhone.
 
 ## ⬇️ Get the app
 
-1. **[Download `RosterFocus.dmg`](https://github.com/TemujinCalidius/roster-focus/releases/latest)** from the latest release.
+1. **[Download `RosterFocus.dmg`](https://github.com/TemujinCalidius/roster-focus/releases/latest/download/RosterFocus.dmg)** (the macOS installer).
 2. Open the DMG and **drag RosterFocus to Applications**.
 3. Launch it — a 🌙 icon appears in your menu bar. Open **“Set Up / Edit Rules…”** and follow the wizard.
 
