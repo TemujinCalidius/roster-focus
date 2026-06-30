@@ -87,11 +87,11 @@ RosterFocus uses two long-lived branches:
    ```bash
    cd app && ./scripts/package-notarize.sh      # → app/build-release/RosterFocus.dmg
    ```
-4. Tag and publish, attaching the DMG and announcing it:
+4. Tag and publish, attaching the DMG (the `release.yml` workflow auto-posts the
+   announcement to Discussions, so you don't pass `--discussion-category`):
    ```bash
    gh release create vX.Y.Z app/build-release/RosterFocus.dmg \
-     --title "RosterFocus vX.Y.Z" --notes-file <notes> \
-     --discussion-category Announcements
+     --title "RosterFocus vX.Y.Z" --notes-file <notes> --latest
    # add --prerelease for an rc, e.g. vX.Y.Z-rc1
    ```
 
