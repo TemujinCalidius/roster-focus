@@ -2,8 +2,6 @@
 
 All notable changes to RosterFocus are documented here.
 
-## Unreleased
-
 ## [1.0.0] — 2026-06-30
 
 First stable release. The native **menu-bar app** debuts (device-verified, Developer
