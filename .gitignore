@@ -14,8 +14,8 @@ config.json
 state.json
 
 # Xcode / macOS app build artifacts
-app/build/
-app/build-release/
+app/build*/
 app/DerivedData/
 **/xcuserdata/
 *.xcuserstate
+*.dmg

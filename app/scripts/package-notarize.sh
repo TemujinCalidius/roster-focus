@@ -67,5 +67,14 @@ echo "==> Stapling…"
 xcrun stapler staple "$APP"
 spctl --assess --type execute --verbose=4 "$APP"
 
-echo "==> Done: $APP"
-echo "    (zip it or wrap in a DMG to distribute.)"
+echo "==> Creating DMG…"
+DMG="$DD/RosterFocus.dmg"
+STAGING="$DD/dmg-staging"
+rm -rf "$STAGING" "$DMG"; mkdir -p "$STAGING"
+cp -R "$APP" "$STAGING/"
+ln -s /Applications "$STAGING/Applications"
+hdiutil create -volname "RosterFocus" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
+
+echo "==> Done."
+echo "    App: $APP  (notarized + stapled)"
+echo "    DMG: $DMG  (drag-to-Applications installer)"
