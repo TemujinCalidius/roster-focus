@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App — build & test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        working-directory: app
+        run: xcodegen generate
+
+      - name: Build & run unit tests
+        working-directory: app
+        run: |
+          xcodebuild test \
+            -project RosterFocus.xcodeproj \
+            -scheme RosterFocus \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+  cli:
+    name: CLI — checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python syntax (rosterfocus.py)
+        run: python3 -m py_compile rosterfocus.py
+
+      - name: Validate example config JSON
+        run: python3 -c "import json; json.load(open('config.example.json')); print('config.example.json OK')"
+
+      - name: Shell scripts parse + shellcheck
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          for s in install.sh shortcuts/build.sh app/scripts/build-local.sh app/scripts/package-notarize.sh app/icon/render.sh; do
+            echo "== $s =="; bash -n "$s"; shellcheck -S warning "$s" || true
+          done

@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Keep our GitHub Actions pinned-versions current (the main moving dependency here).
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels: ["dependencies", "skip-changelog"]
+    commit-message:
+      prefix: "ci"

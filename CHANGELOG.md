@@ -2,6 +2,15 @@
 
 All notable changes to RosterFocus are documented here.
 
+## Unreleased
+
+### Added
+- **App icon** — a crescent moon (Focus) + clock (shift/time) on a gradient squircle,
+  authored as an SVG and rendered to the macOS AppIcon set (`app/icon/`).
+- **Contributor & security infrastructure**: `CONTRIBUTING.md`, `SECURITY.md`, PR + issue
+  templates, `FUNDING.yml`, Dependabot (GitHub Actions), and CI workflows (Swift tests +
+  Python/script checks, CHANGELOG enforcement, release/announce). `dev`/`main` branching model.
+
 ## [0.3.0] — 2026-06-30
 
 ### Added
