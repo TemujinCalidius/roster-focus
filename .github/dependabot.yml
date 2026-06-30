@@ -3,6 +3,7 @@ updates:
   # Keep our GitHub Actions pinned-versions current (the main moving dependency here).
   - package-ecosystem: github-actions
     directory: "/"
+    target-branch: dev        # follow the code→dev model (config is read from the default branch)
     schedule:
       interval: weekly
     labels: ["dependencies", "skip-changelog"]
