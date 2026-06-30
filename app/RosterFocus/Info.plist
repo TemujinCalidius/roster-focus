@@ -28,5 +28,7 @@
 	<string>RosterFocus reads your shift calendars to decide which Focus to turn on automatically.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>RosterFocus reads your shift calendars to decide which Focus to turn on automatically.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>RosterFocus runs your Focus Shortcuts to turn a Focus on or off.</string>
 </dict>
 </plist>

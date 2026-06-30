@@ -17,10 +17,19 @@ struct SetupWizardView: View {
             footer
         }
         .onAppear {
+            // Become a regular foreground app while the wizard is open, so macOS can
+            // present the Calendar and "control Shortcuts" permission prompts (a
+            // background .accessory agent can't show them).
+            NSApp.setActivationPolicy(.regular)
+            NSApp.activate(ignoringOtherApps: true)
             step = 0
             model.refreshAuthorization()
             model.refreshShortcuts()
             model.refreshLoginItem()
+        }
+        .onDisappear {
+            // Back to a menu-bar-only agent (no Dock icon) once setup is closed.
+            NSApp.setActivationPolicy(.accessory)
         }
     }
 

@@ -20,6 +20,13 @@ All notable changes to RosterFocus are documented here.
     (no UI hang) with concurrent pipe draining (no two-pipe deadlock); fail-fast
     notarize pre-flight check; tolerant config/state parsing; a save-error + unsaved-
     changes indicator; reliable wizard window close; and assorted UI-staleness fixes.
+  - **Fixed the Calendar/Shortcuts permission prompt never appearing.** A hardened-
+    runtime app must carry `com.apple.security.personal-information.calendars` (and,
+    for running Shortcuts, `com.apple.security.automation.apple-events`) or macOS
+    silently refuses to prompt. Added both entitlements + an Apple Events usage
+    string, and the setup window now becomes a foreground app so the prompts can
+    actually display (a background menu-bar agent can't present them). Root-caused
+    from the live TCC logs.
 
 ### Notes
 - The CLI is unchanged and remains the recommended path for **headless** Macs. Don't
