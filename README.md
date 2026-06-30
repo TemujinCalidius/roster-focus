@@ -1,6 +1,21 @@
-# RosterFocus
+<p align="center">
+  <img src="app/icon/RosterFocus-1024.png" alt="RosterFocus icon" width="128" height="128">
+</p>
 
-**Turn iOS/macOS Focus modes on and off automatically from your shift calendar — no fixed schedule required.**
+<h1 align="center">RosterFocus</h1>
+
+<p align="center"><strong>Turn iOS/macOS Focus modes on and off automatically from your shift calendar — no fixed schedule required.</strong></p>
+
+<p align="center">
+  <a href="https://github.com/TemujinCalidius/roster-focus/actions/workflows/ci.yml"><img src="https://github.com/TemujinCalidius/roster-focus/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/TemujinCalidius/roster-focus/releases/latest"><img src="https://img.shields.io/github/v/release/TemujinCalidius/roster-focus?sort=semver" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey" alt="macOS 14+">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+</p>
+
+> **Get the app:** download `RosterFocus.dmg` from the
+> [latest release](https://github.com/TemujinCalidius/roster-focus/releases/latest),
+> drag it to Applications, and open it. (It's Developer ID-signed + notarized.)
 
 If you work shifts that move around (different days, different hours, different
 locations), Apple's built-in time- and location-based Focus automations don't
@@ -152,6 +167,17 @@ events ([calendar-focus-sync](https://github.com/a11rew/calendar-focus-sync),
 *desktop* focus for meeting/“focus time” blocks. RosterFocus is built around
 **shift work** and treats the **iPhone as the target** (via Share Across
 Devices), with multiple calendars mapping to multiple Focus modes.
+
+## Contributing
+
+PRs welcome! RosterFocus uses a `dev`/`main` branching model (code → `dev`, docs → `main`).
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for local setup (CLI + app), the test commands, and
+the release runbook. Questions and ideas are great in
+[Discussions](https://github.com/TemujinCalidius/roster-focus/discussions).
+
+## Security
+
+Found a vulnerability? Please report it privately — see **[SECURITY.md](SECURITY.md)**.
 
 ## License
 
